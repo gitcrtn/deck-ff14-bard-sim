@@ -1,6 +1,6 @@
 use iced::{
     Application, Command, Element, Subscription, Size, Length,
-    executor, window, theme,
+    executor, window, theme, subscription, keyboard, Event,
 };
 use iced::widget::{column, container, svg};
 
@@ -15,6 +15,8 @@ pub struct Ui {
 pub enum Message {
     First,
     Tick,
+    KeyPressed(keyboard::KeyCode),
+    KeyReleased(keyboard::KeyCode),
 }
 
 async fn sleep_for_first() {
@@ -67,6 +69,14 @@ impl Application for Ui {
             Message::Tick => {
                 self.player.update();
             },
+            Message::KeyPressed(key_code) => {
+                self.player.gamepad.set_key(key_code);
+                self.player.update();
+            },
+            Message::KeyReleased(key_code) => {
+                self.player.gamepad.unset_key(key_code);
+                self.player.update();
+            },
         }
 
         Command::none()
@@ -92,7 +102,23 @@ impl Application for Ui {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        iced::time::every(std::time::Duration::from_millis(2))
-            .map(|_| Message::Tick)
+        if self.player.gamepad.exists() {
+            iced::time::every(std::time::Duration::from_millis(2))
+                .map(|_| Message::Tick)
+        } else {
+            subscription::events_with(|event, _status| {
+                match event {
+                    Event::Keyboard(
+                        keyboard::Event::KeyPressed {
+                            key_code, ..
+                        }) => Some(Message::KeyPressed(key_code)),
+                    Event::Keyboard(
+                        keyboard::Event::KeyReleased {
+                          key_code, ..
+                        }) => Some(Message::KeyReleased(key_code)),
+                    _ => None,
+                }
+            })
+        }
     }
 }

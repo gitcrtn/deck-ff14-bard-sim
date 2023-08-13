@@ -3,7 +3,7 @@ use crate::audio::{Audio, Note, Octave, Semitone};
 use crate::gamepad::{Button, Gamepad};
 
 pub struct Player {
-    gamepad: Gamepad,
+    pub gamepad: Gamepad,
     audio: Audio,
     semitone: Semitone,
     octave: Octave,
