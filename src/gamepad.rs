@@ -33,8 +33,8 @@ impl KeyInfo {
     }
 }
 
-pub struct Device {
-    target: HidDevice,
+pub struct Gamepad {
+    device: HidDevice,
     buf1: [u8; 256],
     buf2: [u8; 256],
     buf_flipped: bool,
@@ -54,7 +54,7 @@ fn _is_pushed(key_info: &KeyInfo, now_buf: &[u8; 256], _prev_buf: &[u8; 256]) ->
     key_info.is_pushed(now_buf)
 }
 
-impl Device {
+impl Gamepad {
     pub fn new() -> Self {
         let api = HidApi::new().unwrap();
         let mut target: Option<HidDevice> = None;
@@ -70,7 +70,7 @@ impl Device {
         }
 
         Self {
-            target: target.unwrap(),
+            device: target.unwrap(),
             buf1: [0u8; 256],
             buf2: [0u8; 256],
             buf_flipped: false,
@@ -125,6 +125,6 @@ impl Device {
         } else {
             &mut self.buf2
         };
-        let _ = self.target.read(&mut buf[..]);
+        let _ = self.device.read(&mut buf[..]);
     }
 }

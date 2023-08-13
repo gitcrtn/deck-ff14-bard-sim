@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 use crate::audio::{Audio, Note, Octave, Semitone};
-use crate::device::{Button, Device};
+use crate::gamepad::{Button, Gamepad};
 
 pub struct Player {
-    device: Device,
+    gamepad: Gamepad,
     audio: Audio,
     semitone: Semitone,
     octave: Octave,
@@ -16,7 +16,7 @@ pub struct Player {
 
 impl Player {
     pub fn new() -> Self {
-        let device = Device::new();
+        let gamepad = Gamepad::new();
         let audio = Audio::new();
 
         let note_map = vec![
@@ -31,7 +31,7 @@ impl Player {
         ].into_iter().collect();
 
         Self {
-            device,
+            gamepad,
             audio,
             semitone: Semitone::NONE,
             octave: Octave::NONE,
@@ -44,8 +44,8 @@ impl Player {
     }
 
     fn _update_semitone(&mut self) {
-        self.semitone_flat = self.device.is_pushed(&Button::LB);
-        self.semitone_sharp = self.device.is_pushed(&Button::RB);
+        self.semitone_flat = self.gamepad.is_pushed(&Button::LB);
+        self.semitone_sharp = self.gamepad.is_pushed(&Button::RB);
         self.semitone = if self.semitone_flat && !self.semitone_sharp {
             Semitone::FLAT
         } else if !self.semitone_flat && self.semitone_sharp {
@@ -56,8 +56,8 @@ impl Player {
     }
 
     fn _update_octave(&mut self) {
-        self.octave_down = self.device.is_pushed(&Button::LT);
-        self.octave_up = self.device.is_pushed(&Button::RT);
+        self.octave_down = self.gamepad.is_pushed(&Button::LT);
+        self.octave_up = self.gamepad.is_pushed(&Button::RT);
         self.octave = if self.octave_down && !self.octave_up {
             Octave::DOWN
         } else if !self.octave_down && self.octave_up {
@@ -68,12 +68,12 @@ impl Player {
     }
 
     pub fn update(&mut self) {
-        self.device.read();
+        self.gamepad.read();
         self._update_semitone();
         self._update_octave();
 
         for (button, note) in self.note_map.iter() {
-            if self.device.is_pressed(button) {
+            if self.gamepad.is_pressed(button) {
                 self.audio.play(note.clone(), self.semitone, self.octave);
             }
         }

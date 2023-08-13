@@ -1,4 +1,4 @@
-mod device;
+mod gamepad;
 mod ui;
 mod player;
 mod audio;
