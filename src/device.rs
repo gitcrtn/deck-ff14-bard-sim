@@ -28,7 +28,7 @@ struct KeyInfo {
 }
 
 impl KeyInfo {
-    pub fn is_pressed(&self, buf: &[u8; 256]) -> bool {
+    pub fn is_pushed(&self, buf: &[u8; 256]) -> bool {
         (self.mask.clone() & buf[self.index.clone()]) > 0
     }
 }
@@ -39,6 +39,19 @@ pub struct Device {
     buf2: [u8; 256],
     buf_flipped: bool,
     key_info_map: HashMap<Button, KeyInfo>,
+}
+
+
+fn _is_pressed(key_info: &KeyInfo, now_buf: &[u8; 256], prev_buf: &[u8; 256]) -> bool {
+    !key_info.is_pushed(prev_buf) && key_info.is_pushed(now_buf)
+}
+
+// fn _is_pulled(key_info: &KeyInfo, now_buf: &[u8; 256], prev_buf: &[u8; 256]) -> bool {
+//     key_info.is_pushed(prev_buf) && !key_info.is_pushed(now_buf)
+// }
+
+fn _is_pushed(key_info: &KeyInfo, now_buf: &[u8; 256], _prev_buf: &[u8; 256]) -> bool {
+    key_info.is_pushed(now_buf)
 }
 
 impl Device {
@@ -78,8 +91,8 @@ impl Device {
         }
     }
 
-    pub fn is_pressed(&self, button: Button) -> bool {
-        let key_info = self.key_info_map.get(&button).unwrap();
+    fn _check_button(&self, button: &Button, checker_fn: fn(&KeyInfo, &[u8; 256], &[u8; 256]) -> bool) -> bool {
+        let key_info = self.key_info_map.get(button).unwrap();
         let now_buf = if self.buf_flipped {
             &self.buf1
         } else {
@@ -90,7 +103,19 @@ impl Device {
         } else {
             &self.buf1
         };
-        !key_info.is_pressed(prev_buf) && key_info.is_pressed(now_buf)
+        checker_fn(key_info, now_buf, prev_buf)
+    }
+
+    pub fn is_pressed(&self, button: &Button) -> bool {
+        self._check_button(button, _is_pressed)
+    }
+
+    // pub fn is_pulled(&self, button: &Button) -> bool {
+    //     self._check_button(button, _is_pulled)
+    // }
+
+    pub fn is_pushed(&self, button: &Button) -> bool {
+        self._check_button(button, _is_pushed)
     }
 
     pub fn read(&mut self) {

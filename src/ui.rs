@@ -4,11 +4,11 @@ use iced::{
 };
 use iced::widget::{column, container, svg};
 
-use crate::device::{Button, Device};
+use crate::player::Player;
 
 pub struct Ui {
     display_image: svg::Handle,
-    device: Device,
+    player: Player,
 }
 
 #[derive(Debug, Clone)]
@@ -34,12 +34,7 @@ impl Application for Ui {
         let display_image = svg::Handle::from_memory(
             include_bytes!("../images/pad.svg").to_vec());
 
-        let mut device = Device::new();
-        device.read();
-        let a = device.is_pressed(Button::A);
-        let b = device.is_pressed(Button::B);
-        println!("A is pressed: {}", a);
-        println!("B is pressed: {}", b);
+        let player = Player::new();
 
         let startup_cmd = Command::perform(
             sleep_for_first(),
@@ -49,7 +44,7 @@ impl Application for Ui {
         (
             Ui {
                 display_image,
-                device,
+                player,
             },
             Command::batch([
                 startup_cmd,
@@ -70,6 +65,7 @@ impl Application for Ui {
                 ));
             },
             Message::Tick => {
+                self.player.update();
             },
         }
 
@@ -96,7 +92,7 @@ impl Application for Ui {
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        iced::time::every(std::time::Duration::from_millis(10))
+        iced::time::every(std::time::Duration::from_millis(2))
             .map(|_| Message::Tick)
     }
 }
