@@ -8,7 +8,7 @@ Tested on only Steamdeck.
 - Slow termination
 
 ## License
-[GPLv3](https://github.com/gitcrtn/deck-ff14-bard-sim/blob/main/LICENSE)
+[AGPLv3](https://github.com/gitcrtn/deck-ff14-bard-sim/blob/main/LICENSE)
 
 ## Author
 [Carotene](https://github.com/gitcrtn)
